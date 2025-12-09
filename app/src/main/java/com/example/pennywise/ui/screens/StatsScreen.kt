@@ -46,8 +46,9 @@ fun StatsScreen(
     val expenses by viewModel.allExpenses.collectAsState()
     val totalSpent by viewModel.totalSpentThisMonth.collectAsState()
 
-    val darkBackground = Color(0xFF1E1E1E)
-    val textWhite = Color.White
+    val deepForestBlack = Color(0xFF050A05)
+    val metallicGold = Color(0xFFD4AF37)
+    val brightGold = Color(0xFFFFD700)
 
     val categoryTotals = expenses.groupBy { it.category }
         .mapValues { entry -> entry.value.sumOf { it.amount } }
@@ -55,21 +56,25 @@ fun StatsScreen(
         .sortedByDescending { it.second }
 
     val chartColors = listOf(
-        Color(0xFF007BFF), Color(0xFFFFC107), Color(0xFF28A745),
-        Color(0xFFFF5722), Color(0xFF9C27B0), Color(0xFF00BCD4)
+        Color(0xFFFFD700), // Gold
+        Color(0xFF00C853), // Emerald Green
+        Color(0xFFE0E0E0), // Off-White/Silver
+        Color(0xFFFF5722), // Bronze/Orange
+        Color(0xFF00BCD4), // Teal
+        Color(0xFF9C27B0)  // Purple
     )
 
     Scaffold(
-        containerColor = darkBackground,
+        containerColor = deepForestBlack,
         topBar = {
             TopAppBar(
-                title = { Text("Analysis", color = textWhite, fontWeight = FontWeight.Bold) },
+                title = { Text("Analysis", color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = textWhite)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = metallicGold)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = darkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = deepForestBlack)
             )
         }
     ) { paddingValues ->
@@ -94,7 +99,7 @@ fun StatsScreen(
                     }
                     Text(
                         text = "Total\nRs. ${String.format(Locale.getDefault(), "%.0f", totalSpent)}",
-                        color = textWhite,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -113,8 +118,8 @@ fun StatsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(modifier = Modifier.size(12.dp).background(color, CircleShape))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(category, color = textWhite, modifier = Modifier.weight(1f))
-                        Text("Rs. $amount", color = textWhite, fontWeight = FontWeight.Bold)
+                        Text(category, color = Color.White, modifier = Modifier.weight(1f))
+                        Text("Rs. ${String.format(Locale.getDefault(), "%.2f", amount)}", color = brightGold, fontWeight = FontWeight.Bold)
                     }
                 }
             }

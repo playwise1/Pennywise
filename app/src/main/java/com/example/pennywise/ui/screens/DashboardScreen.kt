@@ -33,28 +33,30 @@ fun DashboardScreen(
     var showDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
 
-    val darkBackground = Color(0xFF1E1E1E)
-    val cardBlue = Color(0xFF007BFF)
-    val textWhite = Color.White
+    val deepForestBlack = Color(0xFF050A05)
+    val darkGreen = Color(0xFF1B5E20)
+    val metallicGold = Color(0xFFD4AF37)
+    val brightGold = Color(0xFFFFD700)
+    val cardBackground = Color(0xFF0F140F)
 
     Scaffold(
-        containerColor = darkBackground,
+        containerColor = deepForestBlack,
         topBar = {
             TopAppBar(
-                title = { Text("Pennywise", color = textWhite, fontWeight = FontWeight.Bold) },
+                title = { Text("Pennywise", color = Color.White, fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
-                        Icon(Icons.Default.Analytics, contentDescription = "Analysis", tint = textWhite)
+                        Icon(Icons.Default.Analytics, contentDescription = "Analysis", tint = metallicGold)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = darkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = deepForestBlack)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showDialog = true },
-                containerColor = cardBlue,
-                contentColor = Color.White
+                containerColor = metallicGold,
+                contentColor = Color.Black
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Expense")
             }
@@ -107,7 +109,7 @@ fun DashboardScreen(
                     .fillMaxWidth()
                     .height(120.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = cardBlue)
+                colors = CardDefaults.cardColors(containerColor = darkGreen)
             ) {
                 Column(
                     modifier = Modifier
@@ -115,14 +117,14 @@ fun DashboardScreen(
                         .padding(20.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Total Spent This Month", color = textWhite.copy(alpha = 0.8f))
+                    Text(text = "Total Spent This Month", color = Color.White.copy(alpha = 0.8f))
                     val formattedTotal = String.format(Locale.getDefault(), "%.2f", totalSpent ?: 0.0)
-                    Text(text = "Rs. $formattedTotal", color = textWhite, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Rs. $formattedTotal", color = brightGold, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("Recent Transactions", color = textWhite, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text("Recent Transactions", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(16.dp))
 
             // List
@@ -148,11 +150,13 @@ fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
     }
 
     val formattedDate = SimpleDateFormat("EEE MMM dd yyyy, h:mm a", Locale.getDefault()).format(Date(expense.timestamp))
+    val cardBackground = Color(0xFF0F140F)
+    val brightGold = Color(0xFFFFD700)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A))
+        colors = CardDefaults.cardColors(containerColor = cardBackground)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -164,7 +168,7 @@ fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
                 Text(expense.merchant, fontWeight = FontWeight.Bold, color = Color.White)
                 Text(formattedDate, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
             }
-            Text("Rs. ${String.format(Locale.getDefault(), "%.2f", expense.amount)}", fontWeight = FontWeight.Bold, color = Color.White)
+            Text("Rs. ${String.format(Locale.getDefault(), "%.2f", expense.amount)}", fontWeight = FontWeight.Bold, color = brightGold)
             IconButton(onClick = onDeleteClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
             }
