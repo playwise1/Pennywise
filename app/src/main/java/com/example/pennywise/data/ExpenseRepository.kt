@@ -6,6 +6,10 @@ class ExpenseRepository(private val expenseDao: ExpenseDao) {
 
     val allExpenses: Flow<List<Expense>> = expenseDao.getAllExpenses()
 
+    fun getExpensesByDate(start: Long, end: Long): Flow<List<Expense>> {
+        return expenseDao.getExpensesByDate(start, end)
+    }
+
     suspend fun addExpense(expense: Expense) {
         expenseDao.insertExpense(expense)
     }

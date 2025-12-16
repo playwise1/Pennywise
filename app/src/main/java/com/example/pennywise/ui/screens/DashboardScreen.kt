@@ -1,10 +1,14 @@
 package com.example.pennywise.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -29,6 +33,10 @@ fun DashboardScreen(
 ) {
     val totalSpent by viewModel.totalSpentThisMonth.collectAsState()
     val expenses by viewModel.allExpenses.collectAsState()
+    val currentMonthName by viewModel.currentMonthName.collectAsState()
+    val expenseLabel by viewModel.expenseLabel.collectAsState()
+    val canGoNext by viewModel.canGoNext.collectAsState()
+    val isCurrentMonth by viewModel.isCurrentMonth.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
@@ -53,12 +61,14 @@ fun DashboardScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = metallicGold,
-                contentColor = Color.Black
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Expense")
+            if (isCurrentMonth) {
+                FloatingActionButton(
+                    onClick = { showDialog = true },
+                    containerColor = metallicGold,
+                    contentColor = Color.Black
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                }
             }
         }
     ) { paddingValues ->
@@ -91,19 +101,19 @@ fun DashboardScreen(
             }
 
             expenseToDelete?.let { expense ->
+                val isAtmWithdrawal = expense.merchant == "ATM Withdrawal"
                 AlertDialog(
                     onDismissRequest = { expenseToDelete = null },
-                    title = { Text("Delete Transaction?") },
-                    text = { Text("Are you sure you want to remove this transaction?") },
+                    title = { Text(if (isAtmWithdrawal) "Delete ATM Record?" else "Delete Transaction?") },
+                    text = { Text(if (isAtmWithdrawal) "This is a verified bank transaction. Are you sure you want to delete it?" else "Are you sure you want to remove this transaction?") },
                     confirmButton = {
-                        Button(
+                        TextButton(
                             onClick = {
                                 viewModel.deleteExpense(expense)
                                 expenseToDelete = null
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            }
                         ) {
-                            Text("Delete")
+                            Text("Delete", color = Color.Red)
                         }
                     },
                     dismissButton = {
@@ -117,20 +127,58 @@ fun DashboardScreen(
             // Total Card
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = darkGreen)
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Total Spent This Month", color = Color.White.copy(alpha = 0.8f))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    ) {
+                        IconButton(onClick = { viewModel.previousMonth() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Month", tint = Color.White)
+                        }
+                        Text(
+                            text = currentMonthName.uppercase(),
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        IconButton(onClick = { viewModel.nextMonth() }, enabled = canGoNext) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForward, 
+                                contentDescription = "Next Month", 
+                                tint = if (canGoNext) metallicGold else Color.Gray.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = expenseLabel,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     val formattedTotal = String.format(Locale.getDefault(), "%.2f", totalSpent ?: 0.0)
-                    Text(text = "Rs. $formattedTotal", color = brightGold, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Rs. $formattedTotal",
+                        color = metallicGold,
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 }
             }
 
@@ -152,6 +200,7 @@ fun DashboardScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
     val categoryIcon = when (expense.category) {
@@ -168,7 +217,18 @@ fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> 
     val metallicGold = Color(0xFFD4AF37)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { 
+                    if (expense.merchant != "ATM Withdrawal") {
+                        onEditClick()
+                    }
+                 },
+                onLongClick = {
+                    onDeleteClick()
+                }
+            ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackground)
     ) {
@@ -183,13 +243,14 @@ fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> 
                 Text(formattedDate, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
             }
             Text("Rs. ${String.format(Locale.getDefault(), "%.2f", expense.amount)}", fontWeight = FontWeight.Bold, color = brightGold)
+            
             if (expense.merchant != "ATM Withdrawal") {
                 IconButton(onClick = onEditClick) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit", tint = metallicGold)
                 }
-            }
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
+                IconButton(onClick = onDeleteClick) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
+                }
             }
         }
     }
