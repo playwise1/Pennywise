@@ -158,6 +158,7 @@ fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> 
         "Food" -> Icons.Default.Fastfood
         "Transport" -> Icons.Default.DirectionsCar
         "Shopping" -> Icons.Default.ShoppingCart
+        "Cash" -> Icons.Default.LocalAtm
         else -> Icons.AutoMirrored.Filled.ReceiptLong
     }
 
@@ -182,8 +183,10 @@ fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> 
                 Text(formattedDate, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
             }
             Text("Rs. ${String.format(Locale.getDefault(), "%.2f", expense.amount)}", fontWeight = FontWeight.Bold, color = brightGold)
-            IconButton(onClick = onEditClick) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = metallicGold)
+            if (expense.merchant != "ATM Withdrawal") {
+                IconButton(onClick = onEditClick) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = metallicGold)
+                }
             }
             IconButton(onClick = onDeleteClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)

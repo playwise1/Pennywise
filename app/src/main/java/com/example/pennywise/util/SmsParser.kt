@@ -12,7 +12,8 @@ object SmsParser {
             !body.contains("Debited", ignoreCase = true) &&
             !body.contains("Spent", ignoreCase = true) &&
             !body.contains("Paid", ignoreCase = true) &&
-            !body.contains("Trxn", ignoreCase = true)
+            !body.contains("Trxn", ignoreCase = true) &&
+            !body.contains("withdrawn", ignoreCase = true)
         ) {
             return null
         }
@@ -33,30 +34,37 @@ object SmsParser {
 
         // 3. Extract Merchant Logic
         var merchant = "Unknown"
+        var category = "General"
 
-        // Strategy: Look for the text after "to", "at", or "via"
-        // It captures text until it hits a "stop word" like "on", "from", "Ref", "ending", etc.
-        val merchantRegex = Pattern.compile("(?i)(?:to|at|via)\\s+([a-zA-Z0-9._@\\s&-]+)")
-        val merchantMatcher = merchantRegex.matcher(body)
+        // Handle ATM Withdrawals first
+        if (body.contains("withdrawn", ignoreCase = true) && body.contains("ATM", ignoreCase = true)) {
+            merchant = "ATM Withdrawal"
+            category = "Cash"
+        } else {
+            // Strategy: Look for the text after "to", "at", or "via"
+            // It captures text until it hits a "stop word" like "on", "from", "Ref", "ending", etc.
+            val merchantRegex = Pattern.compile("(?i)(?:to|at|via)\\s+([a-zA-Z0-9._@\\s&-]+)")
+            val merchantMatcher = merchantRegex.matcher(body)
 
-        // We iterate through matches to find the best candidate.
-        // For "Debited ... from Kotak ... to Vyapar", we want the "to" match, not "from".
-        while (merchantMatcher.find()) {
-            val candidate = merchantMatcher.group(1)?.trim() ?: ""
+            // We iterate through matches to find the best candidate.
+            // For "Debited ... from Kotak ... to Vyapar", we want the "to" match, not "from".
+            while (merchantMatcher.find()) {
+                val candidate = merchantMatcher.group(1)?.trim() ?: ""
 
-            // Filter out common banking words that might be mistaken for merchants
-            if (candidate.lowercase() !in listOf("kotak", "bank", "ac", "account", "credit", "debit", "upi")) {
-                merchant = candidate
-                // If we found a valid-looking merchant, stop looking (usually the last 'to' is the receiver)
-                // However, in "from Kotak to Vyapar", the second match is the winner.
+                // Filter out common banking words that might be mistaken for merchants
+                if (candidate.lowercase() !in listOf("kotak", "bank", "ac", "account", "credit", "debit", "upi")) {
+                    merchant = candidate
+                    // If we found a valid-looking merchant, stop looking (usually the last 'to' is the receiver)
+                    // However, in "from Kotak to Vyapar", the second match is the winner.
+                }
             }
+
+            // 4. Cleanup Merchant Name
+            merchant = cleanMerchantName(merchant)
+
+            // 5. Categorize
+            category = getCategory(merchant, body)
         }
-
-        // 4. Cleanup Merchant Name
-        merchant = cleanMerchantName(merchant)
-
-        // 5. Categorize
-        val category = getCategory(merchant, body)
 
         // 6. Return Expense Object (Use your actual Expense entity class here)
         // Note: I am returning an Expense object directly as requested by your earlier prompts.
@@ -102,6 +110,7 @@ object SmsParser {
             text.contains("amazon") || text.contains("flipkart") || text.contains("myntra") || text.contains("ajio") -> "Shopping"
             text.contains("jio") || text.contains("airtel") || text.contains("vi") || text.contains("recharge") -> "Bills"
             text.contains("netflix") || text.contains("spotify") || text.contains("movie") -> "Entertainment"
+            text.contains("apollo") || text.contains("pharmacy") || text.contains("medplus") -> "Health"
             text.contains("blinkit") || text.contains("bigbasket") || text.contains("zepto") || text.contains("grocery") -> "Groceries"
             else -> "General"
         }

@@ -30,7 +30,8 @@ fun AddExpenseDialog(
         "Entertainment",
         "Health",
         "Groceries",
-        "General"
+        "General",
+        "Cash"
     )
     var selectedCategory by remember { mutableStateOf(categories[0]) }
 

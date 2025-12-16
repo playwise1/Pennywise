@@ -34,7 +34,8 @@ fun EditExpenseDialog(
         "Entertainment",
         "Health",
         "Groceries",
-        "General"
+        "General",
+        "Cash"
     )
     val metallicGold = Color(0xFFD4AF37)
     val darkOlive = Color(0xFF1B2615)
