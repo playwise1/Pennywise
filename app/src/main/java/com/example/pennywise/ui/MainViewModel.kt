@@ -63,6 +63,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateExpense(expense: Expense) {
+         viewModelScope.launch {
+             repository.updateExpense(expense)
+         }
+    }
+
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             repository.deleteExpense(expense)

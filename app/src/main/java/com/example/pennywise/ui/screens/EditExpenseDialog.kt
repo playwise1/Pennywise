@@ -12,16 +12,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.pennywise.data.Expense
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExpenseDialog(
+fun EditExpenseDialog(
+    expense: Expense,
     onDismiss: () -> Unit,
-    onConfirm: (amount: Double, merchant: String, category: String) -> Unit
+    onConfirm: (Expense) -> Unit
 ) {
-    var amount by remember { mutableStateOf("") }
-    var merchant by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf(expense.amount.toString()) }
+    var merchant by remember { mutableStateOf(expense.merchant) }
+    var category by remember { mutableStateOf(expense.category) }
     var expanded by remember { mutableStateOf(false) }
+
     val categories = listOf(
         "Food",
         "Transport",
@@ -32,26 +36,28 @@ fun AddExpenseDialog(
         "Groceries",
         "General"
     )
-    var selectedCategory by remember { mutableStateOf(categories[0]) }
-
     val metallicGold = Color(0xFFD4AF37)
     val darkOlive = Color(0xFF1B2615)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = darkOlive,
-        title = { Text(text = "Add Manual Expense", color = Color.White) },
+        title = { Text("Edit Transaction", color = Color.White) },
         text = {
             Column {
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
                     label = { Text("Amount", color = Color.White.copy(alpha = 0.7f)) },
+                    readOnly = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = metallicGold,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.7f),
-                        cursorColor = metallicGold
+                        cursorColor = metallicGold,
+                        disabledTextColor = Color.White,
+                        disabledBorderColor = Color.White.copy(alpha = 0.7f),
+                        disabledLabelColor = Color.White.copy(alpha = 0.7f)
                     ),
                     textStyle = TextStyle(color = Color.White)
                 )
@@ -69,9 +75,12 @@ fun AddExpenseDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
                     OutlinedTextField(
-                        value = selectedCategory,
+                        value = category,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Category", color = Color.White.copy(alpha = 0.7f)) },
@@ -84,12 +93,15 @@ fun AddExpenseDialog(
                         textStyle = TextStyle(color = Color.White),
                         modifier = Modifier.menuAnchor().fillMaxWidth()
                     )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
                         categories.forEach { selectionOption ->
                             DropdownMenuItem(
                                 text = { Text(selectionOption) },
                                 onClick = {
-                                    selectedCategory = selectionOption
+                                    category = selectionOption
                                     expanded = false
                                 }
                             )
@@ -101,15 +113,15 @@ fun AddExpenseDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val amountDouble = amount.toDoubleOrNull() ?: 0.0
-                    onConfirm(amountDouble, merchant, selectedCategory)
+                    val updatedExpense = expense.copy(
+                        merchant = merchant,
+                        category = category
+                    )
+                    onConfirm(updatedExpense)
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = metallicGold,
-                    contentColor = Color.Black
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = metallicGold)
             ) {
-                Text("Add")
+                Text("Save", color = Color.Black)
             }
         },
         dismissButton = {

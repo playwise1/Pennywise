@@ -32,12 +32,12 @@ fun DashboardScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
+    var expenseToEdit by remember { mutableStateOf<Expense?>(null) }
 
     val deepForestBlack = Color(0xFF050A05)
     val darkGreen = Color(0xFF1B5E20)
     val metallicGold = Color(0xFFD4AF37)
     val brightGold = Color(0xFFFFD700)
-    val cardBackground = Color(0xFF0F140F)
 
     Scaffold(
         containerColor = deepForestBlack,
@@ -75,6 +75,17 @@ fun DashboardScreen(
                     onConfirm = { amount, merchant, category ->
                         viewModel.addManualExpense(amount, merchant, category)
                         showDialog = false
+                    }
+                )
+            }
+
+            expenseToEdit?.let { expense ->
+                EditExpenseDialog(
+                    expense = expense,
+                    onDismiss = { expenseToEdit = null },
+                    onConfirm = {
+                        viewModel.updateExpense(it)
+                        expenseToEdit = null
                     }
                 )
             }
@@ -132,7 +143,8 @@ fun DashboardScreen(
                 items(expenses) { expense ->
                     ExpenseItem(
                         expense = expense,
-                        onDeleteClick = { expenseToDelete = expense } // Explicitly using 'expense'
+                        onEditClick = { expenseToEdit = expense },
+                        onDeleteClick = { expenseToDelete = expense }
                     )
                 }
             }
@@ -141,7 +153,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
+fun ExpenseItem(expense: Expense, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
     val categoryIcon = when (expense.category) {
         "Food" -> Icons.Default.Fastfood
         "Transport" -> Icons.Default.DirectionsCar
@@ -152,6 +164,7 @@ fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
     val formattedDate = SimpleDateFormat("EEE MMM dd yyyy, h:mm a", Locale.getDefault()).format(Date(expense.timestamp))
     val cardBackground = Color(0xFF0F140F)
     val brightGold = Color(0xFFFFD700)
+    val metallicGold = Color(0xFFD4AF37)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -169,6 +182,9 @@ fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
                 Text(formattedDate, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
             }
             Text("Rs. ${String.format(Locale.getDefault(), "%.2f", expense.amount)}", fontWeight = FontWeight.Bold, color = brightGold)
+            IconButton(onClick = onEditClick) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = metallicGold)
+            }
             IconButton(onClick = onDeleteClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
             }

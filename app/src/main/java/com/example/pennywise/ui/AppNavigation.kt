@@ -1,18 +1,17 @@
 package com.example.pennywise.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pennywise.ui.screens.DashboardScreen
 import com.example.pennywise.ui.screens.PermissionScreen
+import com.example.pennywise.ui.screens.SplashScreen
 import com.example.pennywise.ui.screens.StatsScreen
-
-sealed class Screen(val route: String) {
-    object Permission : Screen("permission")
-    object Dashboard : Screen("dashboard")
-    object Stats : Screen("stats")
-}
 
 @Composable
 fun AppNavigation(
@@ -20,9 +19,22 @@ fun AppNavigation(
     hasPermissions: Boolean
 ) {
     val navController = rememberNavController()
-    val startDestination = if (hasPermissions) Screen.Dashboard.route else Screen.Permission.route
+    val startDestination = Screen.Splash.route
+    val context = LocalContext.current
 
     NavHost(navController = navController, startDestination = startDestination) {
+        composable(Screen.Splash.route) {
+            SplashScreen(onTimeout = {
+                navController.popBackStack()
+                val destination = if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED) {
+                    Screen.Dashboard.route
+                } else {
+                    Screen.Permission.route
+                }
+                navController.navigate(destination)
+            })
+        }
+
         composable(Screen.Permission.route) {
             PermissionScreen(
                 onPermissionGranted = {
@@ -33,7 +45,6 @@ fun AppNavigation(
             )
         }
 
-        // --- THIS IS THE FIX ---
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 viewModel = viewModel,
@@ -42,7 +53,6 @@ fun AppNavigation(
                 }
             )
         }
-        // -----------------------
 
         composable(Screen.Stats.route) {
             StatsScreen(
