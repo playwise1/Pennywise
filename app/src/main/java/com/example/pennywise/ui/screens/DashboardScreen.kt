@@ -11,12 +11,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pennywise.data.Expense
@@ -41,23 +45,46 @@ fun DashboardScreen(
     var showDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
     var expenseToEdit by remember { mutableStateOf<Expense?>(null) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     val deepForestBlack = Color(0xFF050A05)
     val darkGreen = Color(0xFF1B5E20)
     val metallicGold = Color(0xFFD4AF37)
-    val brightGold = Color(0xFFFFD700)
+    val darkOlive = Color(0xFF1B2615)
 
     Scaffold(
         containerColor = deepForestBlack,
         topBar = {
-            TopAppBar(
-                title = { Text("Pennywise", color = Color.White, fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onNavigateToStats) {
-                        Icon(Icons.Default.Analytics, contentDescription = "Analysis", tint = metallicGold)
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        text = "PennyWise",
+                        color = Color(0xFFD4AF37),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 22.sp,
+                        letterSpacing = 1.sp
+                    )
+                 },
+                navigationIcon = {
+                    IconButton(onClick = { showAboutDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "About",
+                            tint = metallicGold
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = deepForestBlack)
+                actions = {
+                    IconButton(onClick = onNavigateToStats) {
+                        Icon(
+                            imageVector = Icons.Default.Analytics,
+                            contentDescription = "Analytics",
+                            tint = metallicGold
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = deepForestBlack)
             )
         },
         floatingActionButton = {
@@ -78,7 +105,59 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Dialogs
+            // About Dialog
+            if (showAboutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showAboutDialog = false },
+                    containerColor = darkOlive,
+                    title = { Text("PennyWise v1.0", color = Color.White) },
+                    text = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Developed by Team JAS™", fontWeight = FontWeight.Bold, color = metallicGold)
+                            Text(
+                                text = "Juweria Ashfaq Hussain, Sakina Khan\nSyed Ali Hussain",
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center,
+                                color = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Structure Your Finance with Power and Precision",
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color.White.copy(alpha = 0.2f))
+                            Text(
+                                text = "Automated SMS Expense Tracker built for precision.", 
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "This app operates 100% locally. Your financial data is encrypted on your device and is never uploaded to any cloud server.",
+                                fontStyle = FontStyle.Italic,
+                                color = Color.Gray,
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Text("Built with Jetpack Compose & Room.", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Copyright © 2025 Team JAS. All Rights Reserved.", color = Color.Gray, fontSize = 10.sp)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showAboutDialog = false }) {
+                            Text("Close", color = metallicGold)
+                        }
+                    }
+                )
+            }
+
+            // Add Expense Dialog
             if (showDialog) {
                 AddExpenseDialog(
                     onDismiss = { showDialog = false },
@@ -89,6 +168,7 @@ fun DashboardScreen(
                 )
             }
 
+            // Edit Expense Dialog
             expenseToEdit?.let { expense ->
                 EditExpenseDialog(
                     expense = expense,
@@ -100,12 +180,14 @@ fun DashboardScreen(
                 )
             }
 
+            // Delete Confirmation Dialog
             expenseToDelete?.let { expense ->
                 val isAtmWithdrawal = expense.merchant == "ATM Withdrawal"
                 AlertDialog(
                     onDismissRequest = { expenseToDelete = null },
-                    title = { Text(if (isAtmWithdrawal) "Delete ATM Record?" else "Delete Transaction?") },
-                    text = { Text(if (isAtmWithdrawal) "This is a verified bank transaction. Are you sure you want to delete it?" else "Are you sure you want to remove this transaction?") },
+                    containerColor = darkOlive,
+                    title = { Text(if (isAtmWithdrawal) "Delete ATM Record?" else "Delete Transaction?", color = Color.White) },
+                    text = { Text(if (isAtmWithdrawal) "This is a verified bank transaction. Are you sure you want to delete it?" else "Are you sure you want to remove this transaction?", color = Color.White.copy(alpha = 0.8f)) },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -118,13 +200,13 @@ fun DashboardScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { expenseToDelete = null }) {
-                            Text("Cancel")
+                            Text("Cancel", color = metallicGold)
                         }
                     }
                 )
             }
 
-            // Total Card
+            // Main Content
             Card(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -186,7 +268,6 @@ fun DashboardScreen(
             Text("Recent Transactions", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // List
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(expenses) { expense ->
                     ExpenseItem(
