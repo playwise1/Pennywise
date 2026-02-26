@@ -32,11 +32,12 @@ This project was built entirely in **Kotlin** and follows modern Android develop
 To run this project locally:
 
 1. Clone this repository:
-  
+   ```bash
+   git clone [https://github.com/amazingali382-maker/Pennywise.git](https://github.com/amazingali382-maker/Pennywise.git)
 
 
-2. Open the project in Android Studio.
+3. Open the project in Android Studio.
 
-3. Build the project to sync Gradle dependencies.
+4. Build the project to sync Gradle dependencies.
 
-4. Run the app on an Android emulator or physical device.
+5. Run the app on an Android emulator or physical device.
