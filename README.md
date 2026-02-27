@@ -28,11 +28,15 @@ This project was built entirely in **Kotlin** and follows modern Android develop
 
 ## 📸 Screenshots
 
+<h4 align="center"> APP LOGO </h4>
+<p align="center">
+<img src="https://github.com/user-attachments/assets/b2a52abb-5b8c-4e50-b72a-5a1afd630ea7" width="220" alt="Pennywise app logo" />
+</p>
+<h4 align="center"> APP UI </h4>
 <p align="center">
   <img src="https://github.com/user-attachments/assets/ea484800-bd2e-4024-8c99-746f7f8246b1" width="220" alt="Pennywise Screenshot 1" />
   <img src="https://github.com/user-attachments/assets/52be9e93-bd5e-4a47-928c-2ecbd56726ae" width="220" alt="Pennywise Screenshot 2" />
   <img src="https://github.com/user-attachments/assets/fa739d29-2940-45c9-a809-be95e13a405e" width="220" alt="Pennywise Screenshot 3" />
-
 </p>
 
 ## 💻 Getting Started
