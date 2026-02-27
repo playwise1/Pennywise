@@ -33,7 +33,7 @@ To run this project locally:
 
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/amazingali382-maker/Pennywise.git](https://github.com/amazingali382-maker/Pennywise.git)
+   git clone [https://github.com/playwise1/Pennywise.git](https://github.com/playwise1/Pennywise.git)
 
 
 3. Open the project in Android Studio.
