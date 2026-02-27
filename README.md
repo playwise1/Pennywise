@@ -26,6 +26,12 @@ This project was built entirely in **Kotlin** and follows modern Android develop
 2.  **Regex Engine:** When a new SMS arrives from a recognized bank or UPI sender, the app's Regex engine scans the text for keywords (e.g., "debited", "spent", "INR", "Rs.") and extracts the amount.
 3.  **Categorization & Storage:** The extracted data is stored securely in the local Room Database and immediately reflected on the user's dashboard.
 
+## 📸 Screenshots
+
+![WhatsApp Image 2026-02-27 at 4 36 39 PM (2)](https://github.com/user-attachments/assets/ea484800-bd2e-4024-8c99-746f7f8246b1)
+![WhatsApp Image 2026-02-27 at 4 36 39 PM (1)](https://github.com/user-attachments/assets/52be9e93-bd5e-4a47-928c-2ecbd56726ae)
+![WhatsApp Image 2026-02-27 at 4 36 38 PM](https://github.com/user-attachments/assets/d75d9214-70fa-43ab-ac3c-7a480b88b873)
+![WhatsApp Image 2026-02-27 at 4 36 39 PM](https://github.com/user-attachments/assets/c051b3d5-3e91-4734-bfd1-ea8f09e351d1)
 
 ## 💻 Getting Started
 
